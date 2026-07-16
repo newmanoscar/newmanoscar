@@ -9,16 +9,26 @@ repository name matches the account name, GitHub renders this repo's root
 `README.md` at the top of the owner's GitHub profile page
 (`https://github.com/newmanoscar`).
 
-**Current state: the repository is empty.** At the time this file was written there
-were no commits, no branches, and no source files on the remote — only this
-`CLAUDE.md`. There is no application, build system, package manifest, test suite,
-or CI configuration yet.
+**Current state:** the repository contains a profile `README.md` (rendered on the
+GitHub profile) and this `CLAUDE.md`. There is no application, build system,
+package manifest, test suite, or CI configuration.
+
+The `README.md` uses minimal, generic intro text plus a "Connect with me"
+section of [shields.io](https://shields.io) badges. Several social links are
+placeholders (`href="#"`) awaiting real profile URLs, and the email badge points
+at a placeholder `you@example.com` address — these are meant to be filled in or
+removed by the owner.
 
 Because there is no codebase, most conventional CLAUDE.md sections (architecture,
 build/test commands, module layout) do not apply. This file documents what the repo
 *is* and how to proceed as content is added, rather than describing structure that
 does not exist. **Keep it honest — do not document workflows or files that are not
 actually present.**
+
+## Files
+
+- `README.md` — the public-facing profile content (see "Current state" above).
+- `CLAUDE.md` — this guidance file.
 
 ## What this repo is for
 
