@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Hintergrund des Startbildschirms; gleiche Fläche wie das App-Icon, damit
+         der Start nicht weiß aufblitzt. -->
+    <color name="splashBackground">#1F2D4A</color>
+</resources>

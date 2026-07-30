@@ -42,7 +42,8 @@ npm run dev
 ## Build und native Apps
 
 Siehe **[BUILD.md](BUILD.md)** — Web-Build, Android (Projekt liegt unter
-`android/`, Play-Store-Signing) und iOS (muss auf macOS erzeugt werden).
+`android/`, Icons und Play-Store-Signing sind eingerichtet) und iOS (muss auf
+macOS erzeugt werden).
 
 Kurzform für Android:
 

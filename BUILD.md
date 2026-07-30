@@ -70,26 +70,71 @@ npm run cap:open:android # öffnet Android Studio
 npm run android
 ```
 
-Signiertes Release für den Play Store:
+### Signiertes Release für den Play Store
 
-1. Keystore anlegen (einmalig, sicher aufbewahren – ohne ihn sind keine Updates möglich):
+Das Signing ist in `android/app/build.gradle` bereits eingerichtet. Die
+Zugangsdaten liegen **nicht** im Repo, sondern werden aus
+`android/keystore.properties` (gitignoriert) oder aus Umgebungsvariablen gelesen.
+Fehlt beides, bleibt der Release-Build unsigniert und Gradle gibt einen Hinweis
+aus – `assembleDebug` funktioniert davon unabhängig, ein frischer Klon ist also
+ohne Keystore direkt baubar.
+
+1. Keystore anlegen (einmalig, sicher aufbewahren und sichern – **ohne ihn sind
+   keine Updates der App mehr möglich**):
    ```sh
+   cd android
    keytool -genkey -v -keystore spesenrechner.keystore \
      -alias spesenrechner -keyalg RSA -keysize 2048 -validity 10000
    ```
-2. In Android Studio: *Build → Generate Signed App Bundle / APK → Android App Bundle*,
-   den Keystore auswählen, Variante `release`.
-3. Das entstandene `.aab` in der Play Console hochladen.
+2. `android/keystore.properties` nach dem Muster von
+   `android/keystore.properties.example` anlegen:
+   ```properties
+   storeFile=spesenrechner.keystore
+   storePassword=…
+   keyAlias=spesenrechner
+   keyPassword=…
+   ```
+   `storeFile` ist relativ zu `android/` oder absolut.
+3. Bauen:
+   ```sh
+   npm run cap:sync
+   cd android && ./gradlew bundleRelease     # -> app/build/outputs/bundle/release/*.aab
+   # oder ./gradlew assembleRelease          # -> app/build/outputs/apk/release/*.apk
+   ```
+   Alternativ in Android Studio: *Build → Generate Signed App Bundle / APK*.
+4. Das `.aab` in der Play Console hochladen.
 
-Alternativ auf der Kommandozeile, wenn Signing in `android/app/build.gradle`
-konfiguriert ist:
-
-```sh
-cd android && ./gradlew bundleRelease
-```
+Für CI gehen statt der Datei auch Umgebungsvariablen — die Datei hat Vorrang:
+`SPESEN_KEYSTORE_FILE`, `SPESEN_KEYSTORE_PASSWORD`, `SPESEN_KEY_ALIAS`,
+`SPESEN_KEY_PASSWORD`.
 
 App-ID: `app.lovable.spesenrechner` — muss in der Play Console identisch sein und
 lässt sich nach der ersten Veröffentlichung nicht mehr ändern.
+
+### Versionsnummern
+
+In `android/app/build.gradle` stehen `versionCode 1` und `versionName "1.0"`.
+Der `versionCode` muss bei **jedem** Upload in die Play Console erhöht werden,
+sonst lehnt sie das Bundle ab; `versionName` ist die für Nutzer sichtbare Version.
+
+### App-Icon und Startbildschirm
+
+Die Icons sind gesetzt und tragen die Markenfarben der App (Navy `#1F2D4A` mit
+dem bernsteinfarbenen Punkt aus der Wortmarke „Spesen·Rechner"):
+
+- `mipmap-anydpi-v26/ic_launcher.xml` – Adaptive Icon (Android 8+): Fläche aus
+  `@color/ic_launcher_background`, Motiv aus `mipmap-*/ic_launcher_foreground.png`
+- `mipmap-*/ic_launcher.png` – Legacy-Icon für Android 7 (minSdk ist 24)
+- `drawable/splash.xml` – Startbildschirm als Layer-List (Markenfläche plus
+  zentriertes Motiv) statt der früheren `splash.png` pro Bildschirmdichte, damit
+  er auf jeder Auflösung und in beiden Orientierungen scharf bleibt
+- `public/favicon.ico` – 16/32/48 px für die Web-Version
+
+Zum Ersetzen durch eigene Grafiken bietet sich
+[`@capacitor/assets`](https://github.com/ionic-team/capacitor-assets) an: eine
+Quelldatei `assets/icon.png` (1024×1024) und `assets/splash.png` hinterlegen, dann
+`npx @capacitor/assets generate --android` — das überschreibt die generierten
+Dateien.
 
 ## iOS
 
@@ -140,9 +185,9 @@ ersten Beleg-Upload manuell erstellt werden (privat, nicht öffentlich).
   übernommen, damit der Stand byte-identisch zum Lovable-Projekt bleibt.
   `npm run format` würde das bereinigen, erzeugt dann aber einen großen Diff
   gegenüber Lovable.
-- `public/favicon.ico` fehlt (Binärdatei, die über die Lovable-Dateiapi nicht als
-  Text übertragbar war). `src/routes/__root.tsx` verweist darauf; der fehlende
-  Icon-Request läuft ins 404 und beeinträchtigt sonst nichts.
+- Das Favicon aus dem Lovable-Projekt war als Binärdatei nicht über die
+  Dateiapi übertragbar. `public/favicon.ico` ist deshalb neu erzeugt und zeigt
+  jetzt das Icon-Motiv der App statt des Lovable-Standards.
 - Die Schriften kommen von Google Fonts. In der nativen App ohne Netzverbindung
   greifen die System-Fallbacks. Wer sie offline braucht, sollte die Fonts lokal
   einbinden.

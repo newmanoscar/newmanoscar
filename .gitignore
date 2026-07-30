@@ -30,6 +30,11 @@ dist-ssr
 # darin schließen die von Capacitor generierten android/.gitignore bzw.
 # ios/.gitignore aus.
 
+# Signing-Material für den Play Store – niemals committen
+android/keystore.properties
+*.keystore
+*.jks
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
