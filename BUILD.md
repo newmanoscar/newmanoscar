@@ -8,6 +8,19 @@ die nativen Apps für Android und iOS entstehen.
 
 - Node.js 20 oder neuer, npm
 - Für Android: Android Studio (inkl. Android SDK und JDK 21)
+
+> **Zwei Einstellungen in Android Studio**, an denen dieses Projekt sonst scheitert
+> — beide unter *Settings → Build, Execution, Deployment → Build Tools → Gradle*:
+>
+> - **Distribution: „Gradle wrapper"**. Neuere Studio-Versionen stellen das gern auf
+>   eine eigene, aktuellere Gradle-Installation um. Mit Gradle 9 bricht der Sync ab
+>   (`Cannot add extension with name 'kotlin'`), weil mehrere Capacitor-Module
+>   `kotlin-android` anwenden — was Gradle 8 toleriert und Gradle 9 nicht mehr.
+>   Capacitor 8 ist noch nicht Gradle-9-tauglich, deshalb muss der Wrapper mit
+>   Gradle 8.14.3 verwendet werden.
+> - **Gradle JDK: 21**. Gültig ist 17 bis 24 (AGP 8.12 verlangt mindestens 17,
+>   Gradle 8.14.3 höchstens 24). Aktuelle Studio-Versionen liefern JDK 25 mit und
+>   wählen es vor — damit verweigert Gradle den Start.
 - Für iOS: macOS mit Xcode und CocoaPods (`sudo gem install cocoapods`),
   Apple-Developer-Account für die Auslieferung
 
