@@ -191,5 +191,7 @@ ersten Beleg-Upload manuell erstellt werden (privat, nicht öffentlich).
 - Die Schriften kommen von Google Fonts. In der nativen App ohne Netzverbindung
   greifen die System-Fallbacks. Wer sie offline braucht, sollte die Fonts lokal
   einbinden.
-- Lockfiles (`package-lock.json`, `bun.lock`) sind nicht übernommen und werden beim
-  ersten `npm install` neu erzeugt.
+- Lovable arbeitet mit bun, dieses Repo mit npm: `bun.lock` wurde nicht übernommen,
+  stattdessen liegt ein `package-lock.json` bei, damit Release-Builds reproduzierbar
+  sind. bun ignoriert `package-lock.json`, es kollidiert also nicht mit dem
+  Lovable-Toolchain.
