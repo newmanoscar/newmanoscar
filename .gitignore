@@ -25,9 +25,10 @@ dist-ssr
 .wrangler/
 .dev.vars
 
-# Capacitor native projects (generated via `npx cap add`)
-android/
-ios/
+# Die nativen Capacitor-Projekte (android/, ios/) werden mitversioniert – dort
+# liegen Manifest, Berechtigungen, Icons und Signing-Konfiguration. Build-Artefakte
+# darin schließen die von Capacitor generierten android/.gitignore bzw.
+# ios/.gitignore aus.
 
 # Editor directories and files
 .vscode/*
