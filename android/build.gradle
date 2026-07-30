@@ -7,7 +7,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.13.0'
+        // Bewusst 8.12.0 statt der von "cap add android" erzeugten 8.13.0:
+        // Android Studio Narwhal unterstützt AGP nur bis 8.12.0 und verweigert
+        // sonst den Sync ("incompatible version of the Android Gradle plugin").
+        // Voraussetzungen sind erfüllt: AGP 8.12 braucht Gradle >= 8.13 (Wrapper
+        // steht auf 8.14.3) und beherrscht compileSdk 36.
+        // Erst anheben, wenn Android Studio auf eine Version aktualisiert wurde,
+        // die AGP 8.13 unterstützt.
+        classpath 'com.android.tools.build:gradle:8.12.0'
         classpath 'com.google.gms:google-services:4.4.4'
 
         // NOTE: Do not place your application dependencies here; they belong
