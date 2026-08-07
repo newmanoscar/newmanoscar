@@ -173,7 +173,8 @@ export function DayDialog({
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Für das Land wird automatisch das passende Satzprofil verwendet, sofern angelegt.
+                  Es gilt das Satzprofil für dieses Land, sonst die gesetzliche
+                  Auslandspauschale.
                 </p>
               </div>
 

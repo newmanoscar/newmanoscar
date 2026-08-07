@@ -2,6 +2,7 @@ import * as XLSX from "xlsx";
 import type { DayEntry, DayEntryDraft, DayStatus, RateProfile } from "./types";
 import { STATUS_LABEL } from "./types";
 import { calcDay, daysInMonth, eur, iso, MONTHS, rateFor, WEEKDAYS, weekdayIndex } from "./calc";
+import { COUNTRY_RATES } from "./countries";
 
 export type Row = {
   date: string;
@@ -29,6 +30,7 @@ export function buildSheetData(
     "Bis",
     "Stunden",
     "Ziel",
+    "Land",
     "Anreise",
     "Abreise",
     "Frühstück",
@@ -51,6 +53,9 @@ export function buildSheetData(
       r.entry.end_time ?? "",
       r.entry.hours || 0,
       r.entry.destination ?? "",
+      // Ohne diese Spalte verliert ein Export-Import-Rundlauf das Reiseland, und
+      // Auslandstage würden anschließend mit dem Inlandssatz gerechnet.
+      r.entry.travel_country ?? "",
       r.entry.is_arrival ? "x" : "",
       r.entry.is_departure ? "x" : "",
       r.entry.breakfast ? "x" : "",
@@ -63,8 +68,13 @@ export function buildSheetData(
       r.entry.note ?? "",
     ];
   });
-  const total = body.reduce((s, r) => s + (r[15] as number), 0);
-  const sum = ["Summe", "", "", "", "", "", "", "", "", "", "", "", "", "", "", Math.round(total * 100) / 100, ""];
+  // Spaltenposition aus der Kopfzeile ableiten, damit eine zusätzliche Spalte die
+  // Summenzeile nicht stillschweigend in die falsche Spalte schiebt.
+  const betragIdx = head.indexOf("Betrag");
+  const total = body.reduce((s, r) => s + Number(r[betragIdx] ?? 0), 0);
+  const sum: (string | number)[] = head.map(() => "");
+  sum[0] = "Summe";
+  sum[betragIdx] = Math.round(total * 100) / 100;
   return [head, ...body, sum];
 }
 
@@ -171,6 +181,7 @@ export async function parseImportFile(file: File): Promise<ImportedRow[]> {
     end: col("bis"),
     hours: col("stunden"),
     dest: col("ziel"),
+    country: col("land", "reiseland"),
     arr: col("anreise"),
     dep: col("abreise"),
     b: col("frühstück", "fruehstueck"),
@@ -194,8 +205,19 @@ export async function parseImportFile(file: File): Promise<ImportedRow[]> {
   for (const row of aoa.slice(headerIdx + 1)) {
     const date = toDate(row[idx.date]);
     if (!date) continue;
+    // Reiseland akzeptiert sowohl den Ländercode ("FR") als auch den Namen
+    // ("Frankreich"); Deutschland bleibt als Inland ohne Eintrag.
+    const rawCountry = idx.country >= 0 ? String(row[idx.country] ?? "").trim() : "";
+    const matched = rawCountry
+      ? COUNTRY_RATES.find(
+          (c) =>
+            c.code.toLowerCase() === rawCountry.toLowerCase() ||
+            c.name.toLowerCase() === rawCountry.toLowerCase(),
+        )
+      : undefined;
+
     out.push({
-      travel_country: null,
+      travel_country: matched && matched.code !== "DE" ? matched.code : null,
       receipt_path: null,
       entry_date: date,
       status: idx.status >= 0 ? labelToStatus(String(row[idx.status] ?? "")) : "office",

@@ -7,7 +7,7 @@ die nativen Apps für Android und iOS entstehen.
 ## Voraussetzungen
 
 - Node.js 20 oder neuer, npm
-- Für Android: Android Studio (inkl. Android SDK und JDK 21)
+- Für Android: Android Studio (für das SDK) **und eine separate JDK 21**
 
 > **Zwei Einstellungen in Android Studio**, an denen dieses Projekt sonst scheitert
 > — beide unter *Settings → Build, Execution, Deployment → Build Tools → Gradle*:
@@ -23,6 +23,21 @@ die nativen Apps für Android und iOS entstehen.
 >   wählen es vor — damit verweigert Gradle den Start.
 - Für iOS: macOS mit Xcode und CocoaPods (`sudo gem install cocoapods`),
   Apple-Developer-Account für die Auslieferung
+
+> **JDK 21 ist Pflicht, die JBR von Android Studio reicht nicht.** Neuere
+> Studio-Versionen bringen eine JBR 25 mit; Gradle 8.14.3 unterstützt aber nur bis
+> Java 24 und bricht dann sofort mit `Unsupported class file major version 69` ab.
+> Deshalb eine eigene JDK 21 installieren (`winget install Microsoft.OpenJDK.21`)
+> und `JAVA_HOME` für den Build darauf zeigen lassen, z. B. in PowerShell:
+>
+> ```powershell
+> $env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot"
+> ```
+>
+> In Android Studio dasselbe unter *Settings → Build, Execution, Deployment →
+> Build Tools → Gradle → Gradle JDK* einstellen. Hängt noch ein Daemon mit der
+> falschen JDK, erst `./gradlew --stop` — sonst verdeckt eine
+> `AccessDeniedException` auf `.gradle/` die eigentliche Ursache.
 
 ```sh
 npm install

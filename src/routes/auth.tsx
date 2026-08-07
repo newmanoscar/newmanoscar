@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { signInWithGoogle } from "@/lib/auth/google";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,22 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+/**
+ * Übersetzt die wenig hilfreichen Supabase-Meldungen in etwas, mit dem man etwas
+ * anfangen kann. "Invalid login credentials" kommt nämlich auch dann, wenn das
+ * Konto existiert, die E-Mail aber noch nicht bestätigt ist.
+ */
+function loginErrorText(err: Error): string {
+  const msg = err.message ?? "";
+  if (/email not confirmed/i.test(msg)) {
+    return "E-Mail noch nicht bestätigt. Klick den Link in der Bestätigungsmail.";
+  }
+  if (/invalid login credentials/i.test(msg)) {
+    return "Anmeldung fehlgeschlagen. Entweder stimmt das Passwort nicht – oder die E-Mail-Adresse ist noch nicht bestätigt.";
+  }
+  return msg;
+}
+
 function AuthPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -45,13 +61,26 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast.success("Konto erstellt. Du kannst dich jetzt anmelden.");
+
+        // Verlangt das Projekt eine E-Mail-Bestätigung, liefert signUp zwar einen
+        // Nutzer, aber keine Session. Bis der Link angeklickt ist, scheitert die
+        // Anmeldung — und Supabase meldet dann irreführend "Invalid login
+        // credentials". Deshalb hier klar ansagen, was noch fehlt.
+        if (data.session) {
+          navigate({ to: "/" });
+          return;
+        }
+        toast.success(
+          "Konto erstellt. Bestätige zuerst den Link in der E-Mail an " +
+            `${email} – danach kannst du dich anmelden.`,
+          { duration: 10000 },
+        );
         setMode("login");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -59,22 +88,25 @@ function AuthPage() {
         navigate({ to: "/" });
       }
     } catch (err) {
-      toast.error((err as Error).message);
+      toast.error(loginErrorText(err as Error));
     } finally {
       setBusy(false);
     }
   };
 
   const google = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      toast.error("Google-Anmeldung fehlgeschlagen.");
-      return;
+    setBusy(true);
+    try {
+      const { error } = await signInWithGoogle();
+      if (error) {
+        toast.error(`Google-Anmeldung fehlgeschlagen: ${error.message}`);
+        return;
+      }
+      // Im Web ist die Seite an dieser Stelle bereits zum Broker weitergeleitet.
+      navigate({ to: "/" });
+    } finally {
+      setBusy(false);
     }
-    if (result.redirected) return;
-    navigate({ to: "/" });
   };
 
   return (
@@ -114,7 +146,7 @@ function AuthPage() {
           </Button>
         </form>
 
-        <Button variant="outline" className="mt-3 w-full" onClick={google}>
+        <Button variant="outline" className="mt-3 w-full" onClick={google} disabled={busy}>
           Mit Google anmelden
         </Button>
 

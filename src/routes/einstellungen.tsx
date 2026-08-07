@@ -249,7 +249,24 @@ function RateCard({
         <Label>Gilt für Reiseland</Label>
         <Select
           value={draft.country_code ?? "none"}
-          onValueChange={(v) => setDraft({ ...draft, country_code: v === "none" ? null : v })}
+          onValueChange={(v) => {
+            if (v === "none") {
+              setDraft({ ...draft, country_code: null });
+              return;
+            }
+            // Die Auswahlliste zeigt die gesetzlichen Sätze des Landes an – dann
+            // müssen sie auch übernommen werden, sonst rechnet das Profil weiter
+            // mit den Inlandsbeträgen. Der An-/Abreisetag bekommt im Ausland die
+            // kleine Auslandspauschale.
+            const c = COUNTRY_RATES.find((x) => x.code === v);
+            setDraft({
+              ...draft,
+              country_code: v,
+              ...(c
+                ? { full_day: c.full_day, partial_day: c.partial_day, travel_day: c.partial_day }
+                : {}),
+            });
+          }}
         >
           <SelectTrigger>
             <SelectValue />
@@ -264,7 +281,9 @@ function RateCard({
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          Tage mit diesem Reiseland nutzen automatisch dieses Profil.
+          Tage mit diesem Reiseland nutzen automatisch dieses Profil. Die Beträge oben werden
+          bei der Auswahl mit den gesetzlichen Sätzen des Landes vorbelegt und bleiben
+          änderbar.
         </p>
       </div>
 

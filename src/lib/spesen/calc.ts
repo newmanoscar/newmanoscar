@@ -1,4 +1,5 @@
 import type { DayEntry, DayEntryDraft, RateProfile } from "./types";
+import { COUNTRY_RATES } from "./countries";
 
 export const num = (v: unknown): number => {
   const n = typeof v === "number" ? v : parseFloat(String(v ?? "").replace(",", "."));
@@ -18,8 +19,11 @@ export function hoursFromTimes(start?: string | null, end?: string | null): numb
   const a = p(start);
   const b = p(end);
   if (a === null || b === null) return null;
+  // Gleiche Uhrzeit heißt volle 24 h, nicht null: Ein Zwischentag einer mehrtägigen
+  // Reise wird typischerweise als 08:00-08:00 erfasst. Mit "< 0" ergab das 0 Stunden,
+  // der Tag fiel unter die Mindeststundenschwelle und die Volltagspauschale entfiel.
   let diff = b - a;
-  if (diff < 0) diff += 24 * 60;
+  if (diff <= 0) diff += 24 * 60;
   return Math.round((diff / 60) * 100) / 100;
 }
 
@@ -83,11 +87,34 @@ export function rateFor(
 ): RateProfile | undefined {
   const explicit = rates.find((r) => r.id === entry.rate_profile_id);
   if (explicit) return explicit;
+
+  const base = rates.find((r) => r.is_default) ?? rates[0];
+
   if (entry.travel_country) {
     const byCountry = rates.find((r) => r.country_code === entry.travel_country);
     if (byCountry) return byCountry;
+
+    // Für das Reiseland ist kein eigenes Profil angelegt: die gesetzliche
+    // Auslandspauschale verwenden, statt still mit dem Inlandssatz zu rechnen.
+    // Mindeststundenschwelle und Kürzungssätze sind gesetzlich landesunabhängig
+    // (20/40/40 %), sie kommen deshalb weiter aus dem Standardprofil. Der
+    // An-/Abreisetag bekommt im Ausland die kleine Auslandspauschale.
+    const statutory = COUNTRY_RATES.find((c) => c.code === entry.travel_country);
+    if (statutory && base) {
+      return {
+        ...base,
+        id: `country:${statutory.code}`,
+        name: `${statutory.name} (gesetzlicher Satz)`,
+        full_day: statutory.full_day,
+        partial_day: statutory.partial_day,
+        travel_day: statutory.partial_day,
+        country_code: statutory.code,
+        is_default: false,
+      };
+    }
   }
-  return rates.find((r) => r.is_default) ?? rates[0];
+
+  return base;
 }
 
 export type MonthSummary = {

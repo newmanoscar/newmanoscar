@@ -3,4 +3,7 @@
     <!-- Hintergrund des Startbildschirms; gleiche Fläche wie das App-Icon, damit
          der Start nicht weiß aufblitzt. -->
     <color name="splashBackground">#1F2D4A</color>
+    <color name="colorPrimary">#1F2D4A</color>
+    <color name="colorPrimaryDark">#111929</color>
+    <color name="colorAccent">#3A7CA5</color>
 </resources>
