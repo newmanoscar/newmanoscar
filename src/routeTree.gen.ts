@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as EinstellungenRouteImport } from './routes/einstellungen'
 import { Route as JahrRouteImport } from './routes/jahr'
+import { Route as PasswortNeuRouteImport } from './routes/passwort-neu'
 import { Route as TabelleRouteImport } from './routes/tabelle'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const JahrRoute = JahrRouteImport.update({
   path: '/jahr',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PasswortNeuRoute = PasswortNeuRouteImport.update({
+  id: '/passwort-neu',
+  path: '/passwort-neu',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TabelleRoute = TabelleRouteImport.update({
   id: '/tabelle',
   path: '/tabelle',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/einstellungen': typeof EinstellungenRoute
   '/jahr': typeof JahrRoute
+  '/passwort-neu': typeof PasswortNeuRoute
   '/tabelle': typeof TabelleRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/einstellungen': typeof EinstellungenRoute
   '/jahr': typeof JahrRoute
+  '/passwort-neu': typeof PasswortNeuRoute
   '/tabelle': typeof TabelleRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,23 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/einstellungen': typeof EinstellungenRoute
   '/jahr': typeof JahrRoute
+  '/passwort-neu': typeof PasswortNeuRoute
   '/tabelle': typeof TabelleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/einstellungen' | '/jahr' | '/tabelle'
+  fullPaths:
+    '/' | '/auth' | '/einstellungen' | '/jahr' | '/passwort-neu' | '/tabelle'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/einstellungen' | '/jahr' | '/tabelle'
-  id: '__root__' | '/' | '/auth' | '/einstellungen' | '/jahr' | '/tabelle'
+  to: '/' | '/auth' | '/einstellungen' | '/jahr' | '/passwort-neu' | '/tabelle'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/einstellungen'
+    | '/jahr'
+    | '/passwort-neu'
+    | '/tabelle'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +93,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   EinstellungenRoute: typeof EinstellungenRoute
   JahrRoute: typeof JahrRoute
+  PasswortNeuRoute: typeof PasswortNeuRoute
   TabelleRoute: typeof TabelleRoute
 }
 
@@ -109,6 +127,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JahrRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/passwort-neu': {
+      id: '/passwort-neu'
+      path: '/passwort-neu'
+      fullPath: '/passwort-neu'
+      preLoaderRoute: typeof PasswortNeuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tabelle': {
       id: '/tabelle'
       path: '/tabelle'
@@ -124,6 +149,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   EinstellungenRoute: EinstellungenRoute,
   JahrRoute: JahrRoute,
+  PasswortNeuRoute: PasswortNeuRoute,
   TabelleRoute: TabelleRoute,
 }
 export const routeTree = rootRouteImport

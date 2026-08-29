@@ -47,7 +47,7 @@ function loginErrorText(err: Error): string {
 function AuthPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -60,7 +60,21 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      if (mode === "signup") {
+      if (mode === "reset") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/passwort-neu`,
+        });
+        if (error) throw error;
+
+        // Supabase meldet auch dann Erfolg, wenn es die Adresse gar nicht gibt —
+        // sonst könnte man über das Formular fremde Konten aufspüren. Der Text
+        // muss deshalb offenlassen, ob wirklich eine Mail rausging.
+        toast.success(
+          `Wenn es ein Konto zu ${email} gibt, ist eine E-Mail mit dem Link unterwegs.`,
+          { duration: 10000 },
+        );
+        setMode("login");
+      } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -116,7 +130,9 @@ function AuthPage() {
           Spesen<span className="text-accent">·</span>Rechner
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Verpflegungsmehraufwand erfassen, berechnen und als Excel exportieren.
+          {mode === "reset"
+            ? "Trag deine E-Mail-Adresse ein. Wir schicken dir einen Link, mit dem du ein neues Passwort vergeben kannst."
+            : "Verpflegungsmehraufwand erfassen, berechnen und als Excel exportieren."}
         </p>
 
         <form onSubmit={submit} className="mt-8 space-y-4">
@@ -130,32 +146,54 @@ function AuthPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="pw">Passwort</Label>
-            <Input
-              id="pw"
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          {mode !== "reset" && (
+            <div className="space-y-1.5">
+              <Label htmlFor="pw">Passwort</Label>
+              <Input
+                id="pw"
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          )}
           <Button type="submit" className="w-full" disabled={busy}>
-            {mode === "login" ? "Anmelden" : "Konto erstellen"}
+            {mode === "login"
+              ? "Anmelden"
+              : mode === "signup"
+                ? "Konto erstellen"
+                : "Link zum Zurücksetzen senden"}
           </Button>
         </form>
 
-        <Button variant="outline" className="mt-3 w-full" onClick={google} disabled={busy}>
-          Mit Google anmelden
-        </Button>
+        {mode !== "reset" && (
+          <Button variant="outline" className="mt-3 w-full" onClick={google} disabled={busy}>
+            Mit Google anmelden
+          </Button>
+        )}
+
+        {mode === "login" && (
+          <button
+            type="button"
+            className="mt-6 w-full text-sm text-muted-foreground underline-offset-4 hover:underline"
+            onClick={() => setMode("reset")}
+          >
+            Passwort vergessen?
+          </button>
+        )}
 
         <button
           type="button"
-          className="mt-6 w-full text-sm text-muted-foreground underline-offset-4 hover:underline"
+          className="mt-3 w-full text-sm text-muted-foreground underline-offset-4 hover:underline"
           onClick={() => setMode(mode === "login" ? "signup" : "login")}
         >
-          {mode === "login" ? "Noch kein Konto? Registrieren" : "Schon ein Konto? Anmelden"}
+          {mode === "login"
+            ? "Noch kein Konto? Registrieren"
+            : mode === "signup"
+              ? "Schon ein Konto? Anmelden"
+              : "Zurück zur Anmeldung"}
         </button>
       </div>
     </div>
