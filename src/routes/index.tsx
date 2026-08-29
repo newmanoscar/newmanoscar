@@ -103,10 +103,20 @@ function CalendarPage() {
     <AppShell>
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" onClick={() => shift(-1)} aria-label="Vorheriger Monat">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => shift(-1)}
+            aria-label="Vorheriger Monat"
+          >
             <ChevronLeft className="size-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={() => shift(1)} aria-label="Nächster Monat">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => shift(1)}
+            aria-label="Nächster Monat"
+          >
             <ChevronRight className="size-4" />
           </Button>
           <Button

@@ -11,7 +11,7 @@ const NAV = [
   { to: "/", label: "Kalender", icon: CalendarDays },
   { to: "/tabelle", label: "Tabelle", icon: SheetIcon },
   { to: "/jahr", label: "Jahr", icon: BarChart3 },
-  { to: "/einstellungen", label: "Sätze", icon: Settings },
+  { to: "/einstellungen", label: "Einstellungen", icon: Settings },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -82,7 +82,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             )}
           >
             <n.icon className="size-5" />
-            {n.label}
+            {/* Feste Vierteilung bei winziger Schrift: lange Beschriftungen wie
+                "Einstellungen" muessen abgeschnitten werden statt das Raster zu
+                sprengen. */}
+            <span className="w-full truncate px-0.5 text-center">{n.label}</span>
           </Link>
         ))}
       </nav>
