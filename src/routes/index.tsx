@@ -63,6 +63,7 @@ const STATUS_STYLE: Record<DayStatus, string> = {
 function CalendarPage() {
   const { user } = useAuth();
   const today = new Date();
+  const todayIso = iso(today.getFullYear(), today.getMonth(), today.getDate());
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
   const [openDate, setOpenDate] = useState<string | null>(null);
@@ -86,6 +87,12 @@ function CalendarPage() {
     setMonth(d.getMonth());
   };
 
+  const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+  const goToday = () => {
+    setYear(today.getFullYear());
+    setMonth(today.getMonth());
+  };
+
   const leading = weekdayIndex(year, month, 1);
   const total = daysInMonth(year, month);
   const draft: DayEntryDraft | null = openDate
@@ -101,6 +108,15 @@ function CalendarPage() {
           </Button>
           <Button variant="outline" size="icon" onClick={() => shift(1)} aria-label="Nächster Monat">
             <ChevronRight className="size-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-1"
+            onClick={goToday}
+            disabled={isCurrentMonth}
+          >
+            Heute
           </Button>
         </div>
         <h1 className="text-2xl font-bold">
@@ -148,6 +164,7 @@ function CalendarPage() {
           const status: DayStatus = entry?.status ?? (holidayName ? "holiday" : "off");
           const amount = entry ? calcDay(entry, rateFor(entry, rates)).amount : 0;
           const isSunday = weekdayIndex(year, month, day) === 6;
+          const isToday = date === todayIso;
           return (
             <button
               key={date}
@@ -158,7 +175,15 @@ function CalendarPage() {
                 !entry && !holidayName && isSunday && "bg-muted/50",
               )}
             >
-              <span className="tabular text-xs font-semibold">{day}</span>
+              <span
+                className={cn(
+                  "tabular inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+                  isToday && "bg-today text-today-foreground",
+                )}
+                aria-current={isToday ? "date" : undefined}
+              >
+                {day}
+              </span>
               {(entry || holidayName) && (
                 <span className="mt-0.5 text-[10px] leading-tight text-muted-foreground">
                   {holidayName && !entry ? holidayName : STATUS_SHORT[status]}

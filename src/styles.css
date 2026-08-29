@@ -45,6 +45,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-today: var(--today);
+  --color-today-foreground: var(--today-foreground);
   --color-ring-offset-background: var(--background);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -85,6 +87,8 @@
   --border: oklch(0.9 0.012 85);
   --input: oklch(0.9 0.012 85);
   --ring: oklch(0.72 0.13 78);
+  --today: oklch(0.55 0.19 262);
+  --today-foreground: oklch(0.99 0 0);
   --chart-1: oklch(0.72 0.13 78);
   --chart-2: oklch(0.55 0.09 200);
   --chart-3: oklch(0.62 0.13 150);
@@ -121,6 +125,8 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.551 0.027 264.364);
+  --today: oklch(0.76 0.11 259);
+  --today-foreground: oklch(0.208 0.042 265.755);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
