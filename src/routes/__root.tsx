@@ -13,22 +13,21 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 
-
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Seite nicht gefunden</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          Diese Seite gibt es nicht oder sie ist umgezogen.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            Zum Kalender
           </Link>
         </div>
       </div>
@@ -47,10 +46,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          Diese Seite konnte nicht geladen werden
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          Etwas ist schiefgelaufen. Lade die Seite neu oder geh zurueck zum Kalender.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -60,13 +59,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            Neu laden
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            Zum Kalender
           </a>
         </div>
       </div>
@@ -85,14 +84,32 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Reisetage, Urlaub, Feiertage, Krankentage und Bürotage im Monatskalender erfassen – die Verpflegungspauschale wird automatisch berechnet.",
       },
+      // Zweiter Riegel gegen die automatische Uebersetzung, siehe RootShell.
+      { name: "google", content: "notranslate" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Spesen & Verpflegungsmehraufwand im Kalender berechnen" },
       { name: "twitter:title", content: "Spesen & Verpflegungsmehraufwand im Kalender berechnen" },
-      { property: "og:description", content: "Reisetage, Urlaub, Feiertage, Krankentage und Bürotage im Monatskalender erfassen – die Verpflegungspauschale wird automatisch berechnet." },
-      { name: "twitter:description", content: "Reisetage, Urlaub, Feiertage, Krankentage und Bürotage im Monatskalender erfassen – die Verpflegungspauschale wird automatisch berechnet." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b9afeda8-0b75-45b0-8ca6-a2af6938b0d5" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b9afeda8-0b75-45b0-8ca6-a2af6938b0d5" },
+      {
+        property: "og:description",
+        content:
+          "Reisetage, Urlaub, Feiertage, Krankentage und Bürotage im Monatskalender erfassen – die Verpflegungspauschale wird automatisch berechnet.",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Reisetage, Urlaub, Feiertage, Krankentage und Bürotage im Monatskalender erfassen – die Verpflegungspauschale wird automatisch berechnet.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b9afeda8-0b75-45b0-8ca6-a2af6938b0d5",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b9afeda8-0b75-45b0-8ca6-a2af6938b0d5",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -114,7 +131,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // lang="de", weil die Oberflaeche durchgaengig deutsch ist — stand vorher
+    // faelschlich auf "en" und war damit der Grund, warum Browser ueberhaupt
+    // eine Uebersetzung anboten.
+    //
+    // translate="no" ist die eigentliche Absicherung: Google Translate ersetzt
+    // die Textknoten der fertigen Seite durch eigene <font>-Elemente. React
+    // verwaltet dieselben Knoten und scheitert beim naechsten Update mit
+    // "removeChild: The node to be removed is not a child of this node" — die
+    // ganze Seite faellt in die Fehlergrenze. Ausgeloest hat das zuverlaessig
+    // jedes Aufklappmenue (am 30.08.2026 am Reiseland-Feld nachgestellt).
+    <html lang="de" translate="no">
       <head>
         <HeadContent />
       </head>
