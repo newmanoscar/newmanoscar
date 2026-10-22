@@ -29,6 +29,12 @@ actually present.**
 
 - `README.md` — the public-facing profile content (see "Current state" above).
 - `CLAUDE.md` — this guidance file.
+- `.claude/skills/stop-slop/` — the `stop-slop` agent skill (writing-style rules that
+  strip common AI prose patterns), installed from `hardikpandya/stop-slop` via
+  `npx -y skills add hardikpandya/stop-slop --skill stop-slop --agent claude-code`.
+  Markdown only, no scripts. It is tooling for assistants, not profile content.
+- `skills-lock.json` — lockfile written by the `skills` CLI, pinning the source and
+  content hash of the installed skill.
 
 ## What this repo is for
 
